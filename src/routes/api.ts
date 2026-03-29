@@ -15,6 +15,10 @@ import {
   requestResetPasswordSchema,
   resetPasswordSchema,
 } from '../validations/auth.validation';
+import { authenticate, requireRole } from '../middlewares/auth.middleware';
+import { createSchedule, checkAvailableSchedule, updateSlotStatus } from '../controllers/schedule.controller';
+import { Role } from '../interfaces/user.interface';
+
 
 const router = Router();
 
@@ -37,5 +41,10 @@ router.post('/auth/verify-email', validate(verifyEmailSchema), verifyEmail);
 router.post('/auth/login', loginRateLimiter, validate(loginSchema), loginUser);
 router.post('/auth/forgot-password', forgotPasswordRateLimiter, validate(requestResetPasswordSchema), requestPasswordReset);
 router.post('/auth/reset-password', validate(resetPasswordSchema), resetPassword);
+
+// Schedule Routes
+router.post('/schedules', authenticate, requireRole([Role.Admin]), createSchedule);
+router.get('/schedules/available', checkAvailableSchedule);
+router.patch('/schedules/slots/:slot_id/status', authenticate, requireRole([Role.Admin]), updateSlotStatus);
 
 export default router;
